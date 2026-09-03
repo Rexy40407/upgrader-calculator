@@ -14,7 +14,7 @@ function calculator(){
     classList:{add(){},remove(){}},
     addEventListener(type,handler){this.listeners[type]=handler}
   }]));
-  const buttons=[0,2,3].map(losses=>({
+  const buttons=[0,1,2,3].map(losses=>({
     dataset:{losses:String(losses)},listeners:{},attributes:{},
     addEventListener(type,handler){this.listeners[type]=handler},
     setAttribute(name,value){this.attributes[name]=String(value)},
@@ -30,12 +30,13 @@ function calculator(){
 
 test('três losses de start começam na loss 4 e contam a probabilidade total',()=>{
   assert.match(html,/Início da streak/);
-  assert.match(html,/Começa sem fillers ou escolhe 2 ou 3 losses de fillers\./);
+  assert.match(html,/Começa sem fillers ou escolhe 1, 2 ou 3 losses de fillers\./);
   assert.doesNotMatch(html,/>Losses anteriores</);
   assert.match(html,/Os fillers aparecem primeiro e a progressão normal continua depois\./);
   assert.match(html,/Perder até à loss máxima/);
   assert.doesNotMatch(html,/a partir de agora/);
   assert.match(html,/data-losses="0"/);
+  assert.match(html,/data-losses="1"/);
   assert.match(html,/data-losses="2"/);
   assert.match(html,/data-losses="3"/);
   assert.match(html,/id="maxLoss"/);
@@ -56,18 +57,35 @@ test('três losses de start começam na loss 4 e contam a probabilidade total',(
 
 test('duas losses de start começam na loss 3 e continuam até à loss 15',()=>{
   const {elements,buttons}=calculator();
-  buttons[1].click();
+  buttons[2].click();
   assert.equal(elements.lossStreak.value,'2');
   assert.equal(elements.maxLoss.value,'15');
   assert.equal(buttons[0].attributes['aria-pressed'],'false');
-  assert.equal(buttons[1].attributes['aria-pressed'],'true');
-  assert.equal(buttons[2].attributes['aria-pressed'],'false');
+  assert.equal(buttons[1].attributes['aria-pressed'],'false');
+  assert.equal(buttons[2].attributes['aria-pressed'],'true');
+  assert.equal(buttons[3].attributes['aria-pressed'],'false');
   assert.equal([...elements.rows.innerHTML.matchAll(/class="filler-row"/g)].length,2);
   assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>3<\/b>/);
   assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>3<\/b>.*?data-label="Chegar aqui">25,00%<\/td><td data-label="Perder até aqui" class="negative">12,5%/);
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>15<\/b>/);
   assert.equal(elements.continueOdds.textContent,'Inclui 2 losses com fillers');
   assert.equal(elements.fullStreakOdds.textContent,'2 fillers + 13 tentativas');
+});
+
+test('uma loss de filler ocupa a loss 1 e a progressão começa na loss 2',()=>{
+  const {elements,buttons}=calculator();
+  buttons[1].click();
+  assert.equal(elements.lossStreak.value,'1');
+  assert.equal(elements.maxLoss.min,'2');
+  assert.equal(buttons[0].attributes['aria-pressed'],'false');
+  assert.equal(buttons[1].attributes['aria-pressed'],'true');
+  assert.equal(buttons[2].attributes['aria-pressed'],'false');
+  assert.equal(buttons[3].attributes['aria-pressed'],'false');
+  assert.equal([...elements.rows.innerHTML.matchAll(/class="filler-row"/g)].length,1);
+  assert.match(elements.rows.innerHTML,/^<tr class="filler-row"><td data-label="Loss"><b>1<\/b><span class="filler-badge">Filler<\/span>/);
+  assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>2<\/b>.*?data-label="Chegar aqui">50,00%<\/td><td data-label="Perder até aqui" class="negative">25%/);
+  assert.equal(elements.continueOdds.textContent,'Inclui 1 loss com filler');
+  assert.equal(elements.fullStreakOdds.textContent,'1 filler + 14 tentativas');
 });
 
 test('sem fillers começa na loss 1 e calcula toda a streak',()=>{
@@ -78,6 +96,7 @@ test('sem fillers começa na loss 1 e calcula toda a streak',()=>{
   assert.equal(buttons[0].attributes['aria-pressed'],'true');
   assert.equal(buttons[1].attributes['aria-pressed'],'false');
   assert.equal(buttons[2].attributes['aria-pressed'],'false');
+  assert.equal(buttons[3].attributes['aria-pressed'],'false');
   assert.doesNotMatch(elements.rows.innerHTML,/class="filler-row"/);
   assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>1<\/b>.*?data-label="Chegar aqui">100,00%<\/td><td data-label="Perder até aqui" class="negative">50%/);
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>15<\/b>/);
