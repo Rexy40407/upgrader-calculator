@@ -9,7 +9,7 @@ assert.ok(scriptMatch,'calculator script not found');
 const script=scriptMatch[1];
 
 function calculator(){
-  const values={price1:1.34,price2:2.68,chance:50,retryChance:30,lossStreak:3,fillerPrice:.27,growth:3.2,rounds:7,maxLoss:10,fee:0,rate:7.7,capitalLimit:278.24,affordableLosses:10,planChance:50};
+  const values={price1:1.34,price2:2.68,chance:50,retryChance:30,lossStreak:3,fillerPrice:.27,growth:3.1,rounds:7,maxLoss:10,fee:0,rate:7.7,capitalLimit:278.24,affordableLosses:10,planChance:50};
   const outputs=['rows','reset','affordForm','applyPlan','plannerError','plannerResult','calculatedPrice','calculatedTarget','calculatedBreakdown','stopLossNote','winProfit','winProfitEuro','winRoi','currentTotalProfit','currentTotalRoi','netTarget','multiplier','continueLoss','continueOneIn','continueOdds','finalStreak','fullStreakOdds','bankroll','bankrollEuro'];
   const elements=Object.fromEntries([...Object.entries(values),...outputs.map(id=>[id,''])].map(([id,value])=>[id,{
     value:String(value),textContent:'',innerHTML:'',listeners:{},hidden:false,
@@ -45,7 +45,7 @@ test('a loss máxima padrão alterna a chance principal e a reduzida',()=>{
   assert.match(html,/data-losses="5"/);
   assert.match(html,/id="fillerPrice"[^>]*value="0\.27"/);
   assert.match(html,/id="retryChance"[^>]*value="30"/);
-  assert.match(html,/id="growth"[^>]*value="3\.2"/);
+  assert.match(html,/id="growth"[^>]*value="3\.1"/);
   assert.doesNotMatch(html,/id="priorLoss"/);
   assert.match(html,/id="maxLoss"[^>]*value="10"/);
   assert.doesNotMatch(html,/id="rounds"/);
@@ -56,14 +56,14 @@ test('a loss máxima padrão alterna a chance principal e a reduzida',()=>{
   assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>4<\/b>/);
   assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>4<\/b>.*?data-label="Chegar aqui">12,50%<\/td><td data-label="Perder até aqui" class="negative">6,25%/);
   assert.match(elements.rows.innerHTML,/<tr class="retry-row"><td data-label="Loss"><b>5<\/b><span class="retry-badge">Chance reduzida 30%<\/span>.*?data-label="Preço usado">1,34<\/td><td data-label="Valor recebido">4,47<\/td>.*?data-label="Chegar aqui">6,25%<\/td><td data-label="Perder até aqui" class="negative">4,375%/);
-  assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>6<\/b>.*?data-label="Preço usado">4,29<\/td>/);
+  assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>6<\/b>.*?data-label="Preço usado">4,15<\/td>/);
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>10<\/b>/);
   assert.doesNotMatch(elements.rows.innerHTML,/data-label="Loss"><b>11<\/b>/);
   assert.equal(elements.continueLoss.textContent,'0,268%');
   assert.equal(elements.continueOneIn.textContent,'1 em 373');
   assert.equal(elements.continueOdds.textContent,'Inclui 3 chances reduzidas');
   assert.equal(elements.fullStreakOdds.textContent,'3 fillers + 4 principais + 3 reduzidas');
-  assert.equal(elements.bankroll.textContent,'83,42 tokens');
+  assert.equal(elements.bankroll.textContent,'77,47 tokens');
 });
 
 test('duas losses de start começam na loss 3 e continuam até à loss 10',()=>{
@@ -146,7 +146,7 @@ test('o preço de cada filler entra no lucro, capital e tabela',()=>{
   elements.fillerPrice.listeners.input();
   assert.equal(elements.currentTotalProfit.textContent,'−0,16 tokens');
   assert.equal(elements.currentTotalRoi.textContent,'−5,63% total');
-  assert.equal(elements.bankroll.textContent,'84,11 tokens');
+  assert.equal(elements.bankroll.textContent,'78,16 tokens');
   assert.match(elements.rows.innerHTML,/^<tr class="filler-row">.*?data-label="Preço usado">0,50<\/td>.*?data-label="Lucro após perdas" class="negative">−0,50<\/td>.*?data-label="Total investido">0,50<\/td>/);
   assert.match(elements.rows.innerHTML,/class="filler-row">.*?<b>3<\/b>.*?data-label="Lucro após perdas" class="negative">−1,50<\/td>.*?data-label="Total investido">1,50<\/td>/);
   assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>4<\/b>.*?data-label="Lucro após perdas" class="negative">−0,16<\/td>.*?data-label="Total investido">2,84<\/td>/);
@@ -167,7 +167,7 @@ test('repor valores restaura a loss máxima para 10',()=>{
   elements.maxLoss.listeners.input();
   elements.reset.listeners.click();
   assert.equal(Number(elements.maxLoss.value),10);
-  assert.equal(Number(elements.growth.value),3.2);
+  assert.equal(Number(elements.growth.value),3.1);
   assert.equal(elements.finalStreak.textContent,'10 losses');
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>10<\/b>/);
   assert.doesNotMatch(elements.rows.innerHTML,/data-label="Loss"><b>11<\/b>/);
@@ -180,7 +180,7 @@ test('o limite 12 termina a tabela e o capital na loss 12',()=>{
   assert.equal(elements.finalStreak.textContent,'12 losses');
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>12<\/b>/);
   assert.doesNotMatch(elements.rows.innerHTML,/data-label="Loss"><b>13<\/b>/);
-  assert.equal(elements.bankroll.textContent,'267,84 tokens');
+  assert.equal(elements.bankroll.textContent,'241,14 tokens');
   assert.equal(elements.continueLoss.textContent,'0,0938%');
   assert.equal(elements.continueOneIn.textContent,'1 em 1066');
   assert.equal(elements.continueOdds.textContent,'Inclui 4 chances reduzidas');
@@ -202,9 +202,9 @@ test('o planeador calcula o maior preço inicial dentro do capital',()=>{
   elements.affordForm.listeners.submit({preventDefault(){}});
   assert.equal(elements.plannerError.hidden,true);
   assert.equal(elements.plannerResult.hidden,false);
-  assert.equal(elements.calculatedPrice.textContent,'4,50 tokens');
-  assert.equal(elements.calculatedTarget.textContent,'Item alvo a 50%: 9,00 tokens');
-  assert.match(elements.calculatedBreakdown.textContent,/Capital usado: 278,23 de 278,24 tokens/);
+  assert.equal(elements.calculatedPrice.textContent,'4,84 tokens');
+  assert.equal(elements.calculatedTarget.textContent,'Item alvo a 50%: 9,68 tokens');
+  assert.match(elements.calculatedBreakdown.textContent,/Capital usado: 277,70 de 278,24 tokens/);
   assert.match(elements.calculatedBreakdown.textContent,/3 fillers \+ 4 principais \+ 3 reduzidas/);
   assert.match(elements.calculatedBreakdown.textContent,/perder a streak: 0,268%/);
 });
@@ -242,7 +242,7 @@ test('alterar o capital move imediatamente a stop loss recomendada',()=>{
   const {elements}=calculator();
   elements.capitalLimit.value='50';
   elements.capitalLimit.listeners.input();
-  assert.match(elements.rows.innerHTML,/<tr class="retry-row stop-loss-row"><td data-label="Loss"><b>7<\/b><span class="retry-badge">Chance reduzida 30%<\/span><span class="stop-loss-badge">Stop loss recomendada<\/span>/);
-  assert.match(elements.stopLossNote.textContent,/parar após a loss 7, com 12,07 tokens usados/);
+  assert.match(elements.rows.innerHTML,/<tr class="stop-loss-row"><td data-label="Loss"><b>8<\/b><span class="stop-loss-badge">Stop loss recomendada<\/span>/);
+  assert.match(elements.stopLossNote.textContent,/parar após a loss 8, com 24,67 tokens usados/);
   assert.match(elements.stopLossNote.textContent,/metade \(25,00\)/);
 });
