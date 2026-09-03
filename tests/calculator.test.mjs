@@ -33,6 +33,8 @@ test('três losses de start começam na loss 4 e contam a probabilidade total',(
   assert.match(html,/Começa sem fillers ou escolhe 2 ou 3 losses de fillers\./);
   assert.doesNotMatch(html,/>Losses anteriores</);
   assert.match(html,/A primeira linha é a próxima tentativa; os fillers só definem o número da streak\./);
+  assert.match(html,/Perder até à loss máxima/);
+  assert.doesNotMatch(html,/a partir de agora/);
   assert.match(html,/data-losses="0"/);
   assert.match(html,/data-losses="2"/);
   assert.match(html,/data-losses="3"/);
@@ -43,8 +45,10 @@ test('três losses de start começam na loss 4 e contam a probabilidade total',(
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>4<\/b>.*?data-label="Chegar aqui">100,00%<\/td><td data-label="Perder até aqui" class="negative">50%/);
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>5<\/b>.*?data-label="Chegar aqui">50,00%<\/td><td data-label="Perder até aqui" class="negative">25%/);
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>15<\/b>/);
-  assert.equal(elements.continueLoss.textContent,'0,0244%');
-  assert.equal(elements.continueOneIn.textContent,'1 em 4096');
+  assert.equal(elements.continueLoss.textContent,'0,0031%');
+  assert.equal(elements.continueOneIn.textContent,'1 em 32768');
+  assert.equal(elements.continueOdds.textContent,'Inclui 3 losses com fillers');
+  assert.equal(elements.fullStreakOdds.textContent,'3 fillers + 12 tentativas');
 });
 
 test('duas losses de start começam na loss 3 e continuam até à loss 15',()=>{
@@ -58,6 +62,8 @@ test('duas losses de start começam na loss 3 e continuam até à loss 15',()=>{
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>3<\/b>/);
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>3<\/b>.*?data-label="Chegar aqui">100,00%<\/td><td data-label="Perder até aqui" class="negative">50%/);
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>15<\/b>/);
+  assert.equal(elements.continueOdds.textContent,'Inclui 2 losses com fillers');
+  assert.equal(elements.fullStreakOdds.textContent,'2 fillers + 13 tentativas');
 });
 
 test('sem fillers começa na loss 1 e calcula toda a streak',()=>{
@@ -72,6 +78,8 @@ test('sem fillers começa na loss 1 e calcula toda a streak',()=>{
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>15<\/b>/);
   assert.equal(elements.continueLoss.textContent,'0,0031%');
   assert.equal(elements.continueOneIn.textContent,'1 em 32768');
+  assert.equal(elements.continueOdds.textContent,'Sem losses com fillers');
+  assert.equal(elements.fullStreakOdds.textContent,'15 tentativas sem fillers');
 });
 
 test('o limite 12 termina a tabela e o capital na loss 12',()=>{
@@ -82,6 +90,18 @@ test('o limite 12 termina a tabela e o capital na loss 12',()=>{
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>12<\/b>/);
   assert.doesNotMatch(elements.rows.innerHTML,/data-label="Loss"><b>13<\/b>/);
   assert.equal(elements.bankroll.textContent,'1347,82 tokens');
-  assert.equal(elements.continueLoss.textContent,'0,1953%');
-  assert.equal(elements.continueOneIn.textContent,'1 em 512');
+  assert.equal(elements.continueLoss.textContent,'0,0244%');
+  assert.equal(elements.continueOneIn.textContent,'1 em 4096');
+  assert.equal(elements.continueOdds.textContent,'Inclui 3 losses com fillers');
+  assert.equal(elements.fullStreakOdds.textContent,'3 fillers + 9 tentativas');
+});
+
+test('três fillers até à loss 4 dão uma streak total de uma em 16',()=>{
+  const {elements}=calculator();
+  elements.maxLoss.value='4';
+  elements.maxLoss.listeners.input();
+  assert.equal(elements.continueLoss.textContent,'6,25%');
+  assert.equal(elements.continueOneIn.textContent,'1 em 16');
+  assert.equal(elements.continueOdds.textContent,'Inclui 3 losses com fillers');
+  assert.equal(elements.fullStreakOdds.textContent,'3 fillers + 1 tentativa');
 });
