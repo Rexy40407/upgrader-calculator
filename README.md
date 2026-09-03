@@ -8,6 +8,8 @@ Abra `index.html` num navegador ou visite o site publicado no GitHub Pages.
 
 Os cálculos são atualizados automaticamente ao alterar os preços, a probabilidade e as opções da progressão.
 
+O painel **Calcular preço inicial** recebe um capital máximo, o total de losses e a chance da simulação. Calcula, ao cêntimo de token, o maior preço inicial cuja progressão completa não ultrapassa o capital indicado. O resultado pode ser aplicado aos campos principais com um clique e considera os fillers, o preço por filler e o aumento atualmente selecionados.
+
 ## Acesso
 
 O site verifica a sessão partilhada com `/nexo-login/` antes de mostrar a calculadora. Visitantes sem sessão válida são enviados para o formulário de login e regressam automaticamente após entrar.

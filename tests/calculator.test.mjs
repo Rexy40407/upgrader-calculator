@@ -9,10 +9,10 @@ assert.ok(scriptMatch,'calculator script not found');
 const script=scriptMatch[1];
 
 function calculator(){
-  const values={price1:1.34,price2:2.68,chance:50,lossStreak:3,fillerPrice:.27,growth:2.2,rounds:7,maxLoss:10,fee:0,rate:7.7};
-  const outputs=['rows','reset','winProfit','winProfitEuro','winRoi','currentTotalProfit','currentTotalRoi','netTarget','multiplier','continueLoss','continueOneIn','continueOdds','finalStreak','fullStreakOdds','bankroll','bankrollEuro'];
+  const values={price1:1.34,price2:2.68,chance:50,lossStreak:3,fillerPrice:.27,growth:2.2,rounds:7,maxLoss:10,fee:0,rate:7.7,capitalLimit:278.24,affordableLosses:10,planChance:50};
+  const outputs=['rows','reset','affordForm','applyPlan','plannerError','plannerResult','calculatedPrice','calculatedTarget','calculatedBreakdown','winProfit','winProfitEuro','winRoi','currentTotalProfit','currentTotalRoi','netTarget','multiplier','continueLoss','continueOneIn','continueOdds','finalStreak','fullStreakOdds','bankroll','bankrollEuro'];
   const elements=Object.fromEntries([...Object.entries(values),...outputs.map(id=>[id,''])].map(([id,value])=>[id,{
-    value:String(value),textContent:'',innerHTML:'',listeners:{},
+    value:String(value),textContent:'',innerHTML:'',listeners:{},hidden:false,
     classList:{add(){},remove(){}},
     addEventListener(type,handler){this.listeners[type]=handler}
   }]));
@@ -158,4 +158,39 @@ test('três fillers até à loss 4 dão uma streak total de uma em 16',()=>{
   assert.equal(elements.continueOneIn.textContent,'1 em 16');
   assert.equal(elements.continueOdds.textContent,'Inclui 3 losses com fillers');
   assert.equal(elements.fullStreakOdds.textContent,'3 fillers + 1 tentativa');
+});
+
+test('o planeador calcula o maior preço inicial dentro do capital',()=>{
+  const {elements}=calculator();
+  elements.affordForm.listeners.submit({preventDefault(){}});
+  assert.equal(elements.plannerError.hidden,true);
+  assert.equal(elements.plannerResult.hidden,false);
+  assert.equal(elements.calculatedPrice.textContent,'1,34 tokens');
+  assert.equal(elements.calculatedTarget.textContent,'Item alvo a 50%: 2,68 tokens');
+  assert.match(elements.calculatedBreakdown.textContent,/Capital usado: 278,24 de 278,24 tokens/);
+  assert.match(elements.calculatedBreakdown.textContent,/3 fillers \+ 7 tentativas/);
+  assert.match(elements.calculatedBreakdown.textContent,/perder a streak: 0,0977%/);
+});
+
+test('aplicar o plano atualiza preços, chance e loss máxima',()=>{
+  const {elements}=calculator();
+  elements.capitalLimit.value='100';
+  elements.affordableLosses.value='8';
+  elements.planChance.value='40';
+  elements.affordForm.listeners.submit({preventDefault(){}});
+  elements.applyPlan.listeners.click();
+  assert.equal(elements.chance.value,'40');
+  assert.equal(elements.maxLoss.value,'8');
+  assert.equal(Number(elements.price2.value),Math.round((Number(elements.price1.value)/.4+Number.EPSILON)*100)/100);
+  assert.equal(elements.finalStreak.textContent,'8 losses');
+  assert.ok(Number(elements.bankroll.textContent.replace(',','.').split(' ')[0])<=100);
+});
+
+test('o planeador valida uma streak maior do que os fillers',()=>{
+  const {elements}=calculator();
+  elements.affordableLosses.value='3';
+  elements.affordForm.listeners.submit({preventDefault(){}});
+  assert.equal(elements.plannerResult.hidden,true);
+  assert.equal(elements.plannerError.hidden,false);
+  assert.equal(elements.plannerError.textContent,'Com 3 fillers, escolhe pelo menos 4 losses.');
 });
