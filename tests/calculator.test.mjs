@@ -44,12 +44,13 @@ test('a progressão alterna a chance principal e a reduzida',()=>{
   assert.match(html,/data-losses="4"/);
   assert.match(html,/data-losses="5"/);
   assert.match(html,/id="fillerPrice"[^>]*value="0\.27"/);
-  assert.match(html,/id="price1"[^>]*value="1\.8"/);
-  assert.match(html,/id="price2"[^>]*value="3\.6"/);
+  assert.match(html,/id="price1"[^>]*value="1\.5"/);
+  assert.match(html,/id="price2"[^>]*value="3"/);
   assert.match(html,/id="retryChance"[^>]*value="30"/);
-  assert.match(html,/id="growth"[^>]*value="3\.1"/);
+  assert.match(html,/id="growth"[^>]*value="4"/);
   assert.doesNotMatch(html,/id="priorLoss"/);
-  assert.match(html,/id="maxLoss"[^>]*value="16"/);
+  assert.match(html,/id="maxLoss"[^>]*value="17"/);
+  assert.match(html,/id="capitalLimit"[^>]*value="0"/);
   assert.doesNotMatch(html,/id="rounds"/);
   const {elements}=calculator();
   assert.equal([...elements.rows.innerHTML.matchAll(/class="filler-row"/g)].length,3);
@@ -194,23 +195,26 @@ test('mantém a tentativa de 10% imediatamente abaixo do limite de 100',()=>{
   assert.match(elements.rows.innerHTML,/<tr class="deep-row"><td data-label="Loss"><b>3<\/b><span class="deep-badge">Chance extra 10%<\/span>.*?data-label="Preço usado">99,99<\/td><td data-label="Valor recebido">999,90<\/td>/);
 });
 
-test('repor valores restaura os novos preços e a loss máxima para 16',()=>{
+test('repor valores restaura os novos preços, capital e loss máxima para 17',()=>{
   const {elements}=calculator();
   elements.maxLoss.value='18';
   elements.maxLoss.listeners.input();
   elements.reset.listeners.click();
-  assert.equal(Number(elements.price1.value),1.8);
-  assert.equal(Number(elements.price2.value),3.6);
-  assert.equal(Number(elements.maxLoss.value),16);
-  assert.equal(Number(elements.growth.value),3.1);
-  assert.equal(elements.finalStreak.textContent,'16 losses');
+  assert.equal(Number(elements.price1.value),1.5);
+  assert.equal(Number(elements.price2.value),3);
+  assert.equal(Number(elements.maxLoss.value),17);
+  assert.equal(Number(elements.growth.value),4);
+  assert.equal(Number(elements.capitalLimit.value),0);
+  assert.equal(elements.finalStreak.textContent,'17 losses');
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>16<\/b>/);
-  assert.doesNotMatch(elements.rows.innerHTML,/data-label="Loss"><b>17<\/b>/);
+  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>17<\/b>/);
+  assert.doesNotMatch(elements.rows.innerHTML,/data-label="Loss"><b>18<\/b>/);
   assert.equal([...elements.rows.innerHTML.matchAll(/class="deep-row/g)].length,4);
-  assert.match(elements.rows.innerHTML,/<tr class="deep-row"><td data-label="Loss"><b>15<\/b>.*?data-label="Preço usado">53,62<\/td>/);
-  assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>16<\/b>.*?data-label="Preço usado">166,23<\/td>/);
-  assert.equal(elements.fullStreakOdds.textContent,'3 fillers + 5 principais + 4 reduzidas + 4 de 10%');
-  assert.equal(elements.bankroll.textContent,'401,94 tokens');
+  assert.match(elements.rows.innerHTML,/<tr class="deep-row"><td data-label="Loss"><b>15<\/b>.*?data-label="Preço usado">96,00<\/td>/);
+  assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>16<\/b>.*?data-label="Preço usado">384,00<\/td>/);
+  assert.match(elements.rows.innerHTML,/<tr class="retry-row"><td data-label="Loss"><b>17<\/b>.*?data-label="Preço usado">384,00<\/td>/);
+  assert.equal(elements.fullStreakOdds.textContent,'3 fillers + 5 principais + 5 reduzidas + 4 de 10%');
+  assert.equal(elements.bankroll.textContent,'1151,31 tokens');
 });
 
 test('o limite 12 termina a tabela e o capital na loss 12',()=>{
