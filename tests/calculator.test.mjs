@@ -1,0 +1,50 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import test from 'node:test';
+import vm from 'node:vm';
+
+const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+const script=html.slice(html.indexOf('<script>')+8,html.indexOf('</script>'));
+
+function calculator(){
+  const values={price1:1.34,price2:2.68,chance:50,lossStreak:3,priorLoss:.81,growth:2.2,rounds:12,fee:0,rate:7.7};
+  const outputs=['rows','reset','winProfit','winProfitEuro','winRoi','currentTotalProfit','currentTotalRoi','netTarget','multiplier','continueLoss','continueOdds','finalStreak','fullStreakOdds','bankroll','bankrollEuro'];
+  const elements=Object.fromEntries([...Object.entries(values),...outputs.map(id=>[id,''])].map(([id,value])=>[id,{
+    value:String(value),textContent:'',innerHTML:'',listeners:{},
+    classList:{add(){},remove(){}},
+    addEventListener(type,handler){this.listeners[type]=handler}
+  }]));
+  const buttons=[2,3].map(losses=>({
+    dataset:{losses:String(losses)},listeners:{},attributes:{},
+    addEventListener(type,handler){this.listeners[type]=handler},
+    setAttribute(name,value){this.attributes[name]=String(value)},
+    click(){this.listeners.click?.()}
+  }));
+  const document={
+    getElementById:id=>elements[id],
+    querySelectorAll:selector=>selector==='[data-losses]'?buttons:[]
+  };
+  vm.runInNewContext(script,{document,Intl,Math,Number});
+  return {elements,buttons};
+}
+
+test('três losses anteriores começam na loss 4 e contam a probabilidade total',()=>{
+  assert.match(html,/data-losses="2"/);
+  assert.match(html,/data-losses="3"/);
+  const {elements}=calculator();
+  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>4<\/b>/);
+  assert.match(elements.rows.innerHTML,/data-label="Chegar aqui">12,50%<\/td><td data-label="Perder até aqui" class="negative">6,25%/);
+  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>15<\/b>/);
+});
+
+test('duas losses anteriores começam na loss 3 e continuam até à loss 15',()=>{
+  const {elements,buttons}=calculator();
+  buttons[0].click();
+  assert.equal(elements.lossStreak.value,'2');
+  assert.equal(elements.rounds.value,'13');
+  assert.equal(buttons[0].attributes['aria-pressed'],'true');
+  assert.equal(buttons[1].attributes['aria-pressed'],'false');
+  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>3<\/b>/);
+  assert.match(elements.rows.innerHTML,/data-label="Chegar aqui">25,00%<\/td><td data-label="Perder até aqui" class="negative">12,5%/);
+  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>15<\/b>/);
+});
