@@ -51,6 +51,8 @@ test('a progressão alterna a chance principal e a reduzida',()=>{
   assert.doesNotMatch(html,/id="priorLoss"/);
   assert.match(html,/id="maxLoss"[^>]*value="17"/);
   assert.match(html,/id="capitalLimit"[^>]*value="0"/);
+  assert.match(html,/\.retry-row:not\(\.stop-loss-row\) td\.positive\{color:var\(--accent\)\}/);
+  assert.match(html,/\.retry-row:not\(\.stop-loss-row\) td\.negative\{color:var\(--danger\)\}/);
   assert.doesNotMatch(html,/id="rounds"/);
   const {elements}=calculator();
   assert.equal([...elements.rows.innerHTML.matchAll(/class="filler-row"/g)].length,3);
