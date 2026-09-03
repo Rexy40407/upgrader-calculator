@@ -23,8 +23,8 @@
     </header>
 
     <div class="streak-control">
-      <div class="streak-copy"><strong>Losses anteriores</strong><span>Escolhe quantas losses já aconteceram.</span></div>
-      <div class="streak-options" role="group" aria-label="Número de losses anteriores">
+      <div class="streak-copy"><strong>Losses de start com fillers</strong><span>Escolhe se começas com 2 ou 3 losses de fillers.</span></div>
+      <div class="streak-options" role="group" aria-label="Número de losses de start com fillers">
         <button class="streak-option" type="button" data-losses="2" aria-pressed="false">2 losses</button>
         <button class="streak-option" type="button" data-losses="3" aria-pressed="true">3 losses</button>
       </div>
@@ -62,14 +62,14 @@
     </output>
 
     <section>
-      <div class="section-head"><h2>Progressão</h2><p>As probabilidades incluem as losses anteriores.</p></div>
+      <div class="section-head"><h2>Progressão</h2><p>As probabilidades incluem as losses de start com fillers.</p></div>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Loss</th><th>Preço usado</th><th>Valor recebido</th><th>Chegar aqui</th><th>Perder até aqui</th><th>Lucro da tentativa</th><th>Lucro após perdas</th><th>Lucro total %</th><th>Total investido</th></tr></thead>
           <tbody id="rows"></tbody>
         </table>
       </div>
-      <div class="footer"><span><b>Chegar aqui:</b> todas as losses anteriores aconteceram.</span><span><b>Perder até aqui:</b> inclui também a loss desta linha.</span></div>
+      <div class="footer"><span><b>Chegar aqui:</b> todas as losses antes desta linha aconteceram.</span><span><b>Perder até aqui:</b> inclui também a loss desta linha.</span></div>
     </section>
   </main>
 

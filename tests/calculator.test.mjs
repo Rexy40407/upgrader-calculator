@@ -28,7 +28,10 @@ function calculator(){
   return {elements,buttons};
 }
 
-test('três losses anteriores começam na loss 4 e contam a probabilidade total',()=>{
+test('três losses de start começam na loss 4 e contam a probabilidade total',()=>{
+  assert.match(html,/Losses de start com fillers/);
+  assert.match(html,/Escolhe se começas com 2 ou 3 losses de fillers\./);
+  assert.doesNotMatch(html,/>Losses anteriores</);
   assert.match(html,/data-losses="2"/);
   assert.match(html,/data-losses="3"/);
   assert.match(html,/id="maxLoss"/);
@@ -41,7 +44,7 @@ test('três losses anteriores começam na loss 4 e contam a probabilidade total'
   assert.equal(elements.continueOneIn.textContent,'1 em 4096');
 });
 
-test('duas losses anteriores começam na loss 3 e continuam até à loss 15',()=>{
+test('duas losses de start começam na loss 3 e continuam até à loss 15',()=>{
   const {elements,buttons}=calculator();
   buttons[0].click();
   assert.equal(elements.lossStreak.value,'2');
