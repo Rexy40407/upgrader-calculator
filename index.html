@@ -55,11 +55,11 @@
       <div class="result"><span class="label">Lucro %</span><strong id="winRoi" class="value accent">+100,00%</strong><span class="note">Sobre o Preço 1</span></div>
       <div class="result"><span class="label">Lucro total agora</span><strong id="currentTotalProfit" class="value">+0,53</strong><span id="currentTotalRoi" class="note">+24,65% total</span></div>
       <div class="result"><span class="label">Payout líquido</span><strong id="netTarget" class="value">2,68</strong><span id="multiplier" class="note">2,00× o Preço 1</span></div>
-      <div class="result"><span class="label">Perder até à loss máxima</span><strong class="value danger probability-value"><span id="continueLoss">0,0031%</span><span id="continueOneIn" class="one-in">1 em 32768</span></strong><span id="continueOdds" class="note">Inclui 3 losses com fillers</span></div>
-      <div class="result"><span class="label">Streak final</span><strong id="finalStreak" class="value">15 losses</strong><span id="fullStreakOdds" class="note">3 fillers + 12 tentativas</span></div>
+      <div class="result"><span class="label">Perder até à loss máxima</span><strong class="value danger probability-value"><span id="continueLoss">0,0977%</span><span id="continueOneIn" class="one-in">1 em 1024</span></strong><span id="continueOdds" class="note">Inclui 3 losses com fillers</span></div>
+      <div class="result"><span class="label">Streak final</span><strong id="finalStreak" class="value">10 losses</strong><span id="fullStreakOdds" class="note">3 fillers + 7 tentativas</span></div>
       <div class="result limit-result">
-        <div class="limit-panel"><label class="label" for="maxLoss">Loss máxima</label><input id="maxLoss" class="max-loss-input" type="number" min="4" max="30" step="1" value="15"><span class="note">Última loss da tabela</span></div>
-        <div class="capital-panel"><span class="label">Capital máximo</span><strong id="bankroll" class="value">14.354,46 tokens</strong><span id="bankrollEuro" class="note">≈ 1.864,22 €</span></div>
+        <div class="limit-panel"><label class="label" for="maxLoss">Loss máxima</label><input id="maxLoss" class="max-loss-input" type="number" min="4" max="30" step="1" value="10"><span class="note">Última loss da tabela</span></div>
+        <div class="capital-panel"><span class="label">Capital máximo</span><strong id="bankroll" class="value">278,24 tokens</strong><span id="bankrollEuro" class="note">≈ 36,14 €</span></div>
       </div>
     </output>
 
@@ -76,12 +76,12 @@
   </main>
 
   <script>
-    const defaults={price1:1.34,price2:2.68,chance:50,lossStreak:3,priorLoss:.81,growth:2.2,maxLoss:15,fee:0,rate:7.7};
+    const defaults={price1:1.34,price2:2.68,chance:50,lossStreak:3,priorLoss:.81,growth:2.2,maxLoss:10,fee:0,rate:7.7};
     const ids=Object.keys(defaults),$=id=>document.getElementById(id),streakButtons=[...document.querySelectorAll('[data-losses]')],fmt=new Intl.NumberFormat('pt-PT',{maximumFractionDigits:4}),cash=new Intl.NumberFormat('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2}),oddsFmt=new Intl.NumberFormat('pt-PT',{maximumFractionDigits:0,useGrouping:false});
     const clamp=(n,a,b)=>Math.min(b,Math.max(a,n)),round2=n=>Math.round((n+Number.EPSILON)*100)/100;
     const signed=n=>{n=Math.abs(n)<.005?0:n;return `${n>0?'+':n<0?'−':''}${cash.format(Math.abs(n))}`};
     const setTone=(el,n)=>{el.classList.remove('positive','negative','accent','danger');el.classList.add(n>=0?'positive':'negative')};
-    const read=()=>{const requestedLossStreak=Math.round(+$('lossStreak').value||0),lossStreak=[0,1,2,3].includes(requestedLossStreak)?requestedLossStreak:3,maxLoss=Math.round(clamp(+$('maxLoss').value||15,lossStreak+1,30));return{price1:Math.max(.01,+$('price1').value||0),price2:Math.max(.01,+$('price2').value||0),chance:clamp(+$('chance').value||0,.01,100),lossStreak,maxLoss,priorLoss:Math.max(0,+$('priorLoss').value||0),growth:Math.max(1,+$('growth').value||0),rounds:maxLoss-lossStreak,fee:clamp(+$('fee').value||0,0,99),rate:Math.max(.01,+$('rate').value||0)}};
+    const read=()=>{const requestedLossStreak=Math.round(+$('lossStreak').value||0),lossStreak=[0,1,2,3].includes(requestedLossStreak)?requestedLossStreak:3,maxLoss=Math.round(clamp(+$('maxLoss').value||10,lossStreak+1,30));return{price1:Math.max(.01,+$('price1').value||0),price2:Math.max(.01,+$('price2').value||0),chance:clamp(+$('chance').value||0,.01,100),lossStreak,maxLoss,priorLoss:Math.max(0,+$('priorLoss').value||0),growth:Math.max(1,+$('growth').value||0),rounds:maxLoss-lossStreak,fee:clamp(+$('fee').value||0,0,99),rate:Math.max(.01,+$('rate').value||0)}};
     function update(){
       const v=read(),p=v.chance/100,q=1-p,feeFactor=1-v.fee/100,netTarget=v.price2*feeFactor,profit=netTarget-v.price1,roi=profit/v.price1,currentExposure=v.priorLoss+v.price1,currentProfit=netTarget-currentExposure,currentRoi=currentProfit/currentExposure;
       let previous=0;const rows=[];

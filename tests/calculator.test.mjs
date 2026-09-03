@@ -7,7 +7,7 @@ const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 const script=html.slice(html.indexOf('<script>')+8,html.indexOf('</script>'));
 
 function calculator(){
-  const values={price1:1.34,price2:2.68,chance:50,lossStreak:3,priorLoss:.81,growth:2.2,rounds:12,maxLoss:15,fee:0,rate:7.7};
+  const values={price1:1.34,price2:2.68,chance:50,lossStreak:3,priorLoss:.81,growth:2.2,rounds:7,maxLoss:10,fee:0,rate:7.7};
   const outputs=['rows','reset','winProfit','winProfitEuro','winRoi','currentTotalProfit','currentTotalRoi','netTarget','multiplier','continueLoss','continueOneIn','continueOdds','finalStreak','fullStreakOdds','bankroll','bankrollEuro'];
   const elements=Object.fromEntries([...Object.entries(values),...outputs.map(id=>[id,''])].map(([id,value])=>[id,{
     value:String(value),textContent:'',innerHTML:'',listeners:{},
@@ -28,7 +28,7 @@ function calculator(){
   return {elements,buttons};
 }
 
-test('três losses de start começam na loss 4 e contam a probabilidade total',()=>{
+test('a loss máxima padrão é 10 e três fillers deixam sete tentativas',()=>{
   assert.match(html,/Início da streak/);
   assert.match(html,/Começa sem fillers ou escolhe 1, 2 ou 3 losses de fillers\./);
   assert.doesNotMatch(html,/>Losses anteriores</);
@@ -39,7 +39,7 @@ test('três losses de start começam na loss 4 e contam a probabilidade total',(
   assert.match(html,/data-losses="1"/);
   assert.match(html,/data-losses="2"/);
   assert.match(html,/data-losses="3"/);
-  assert.match(html,/id="maxLoss"/);
+  assert.match(html,/id="maxLoss"[^>]*value="10"/);
   assert.doesNotMatch(html,/id="rounds"/);
   const {elements}=calculator();
   assert.equal([...elements.rows.innerHTML.matchAll(/class="filler-row"/g)].length,3);
@@ -48,18 +48,19 @@ test('três losses de start começam na loss 4 e contam a probabilidade total',(
   assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>4<\/b>/);
   assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>4<\/b>.*?data-label="Chegar aqui">12,50%<\/td><td data-label="Perder até aqui" class="negative">6,25%/);
   assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>5<\/b>.*?data-label="Chegar aqui">6,25%<\/td><td data-label="Perder até aqui" class="negative">3,125%/);
-  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>15<\/b>/);
-  assert.equal(elements.continueLoss.textContent,'0,0031%');
-  assert.equal(elements.continueOneIn.textContent,'1 em 32768');
+  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>10<\/b>/);
+  assert.doesNotMatch(elements.rows.innerHTML,/data-label="Loss"><b>11<\/b>/);
+  assert.equal(elements.continueLoss.textContent,'0,0977%');
+  assert.equal(elements.continueOneIn.textContent,'1 em 1024');
   assert.equal(elements.continueOdds.textContent,'Inclui 3 losses com fillers');
-  assert.equal(elements.fullStreakOdds.textContent,'3 fillers + 12 tentativas');
+  assert.equal(elements.fullStreakOdds.textContent,'3 fillers + 7 tentativas');
 });
 
-test('duas losses de start começam na loss 3 e continuam até à loss 15',()=>{
+test('duas losses de start começam na loss 3 e continuam até à loss 10',()=>{
   const {elements,buttons}=calculator();
   buttons[2].click();
   assert.equal(elements.lossStreak.value,'2');
-  assert.equal(elements.maxLoss.value,'15');
+  assert.equal(Number(elements.maxLoss.value),10);
   assert.equal(buttons[0].attributes['aria-pressed'],'false');
   assert.equal(buttons[1].attributes['aria-pressed'],'false');
   assert.equal(buttons[2].attributes['aria-pressed'],'true');
@@ -67,9 +68,9 @@ test('duas losses de start começam na loss 3 e continuam até à loss 15',()=>{
   assert.equal([...elements.rows.innerHTML.matchAll(/class="filler-row"/g)].length,2);
   assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>3<\/b>/);
   assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>3<\/b>.*?data-label="Chegar aqui">25,00%<\/td><td data-label="Perder até aqui" class="negative">12,5%/);
-  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>15<\/b>/);
+  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>10<\/b>/);
   assert.equal(elements.continueOdds.textContent,'Inclui 2 losses com fillers');
-  assert.equal(elements.fullStreakOdds.textContent,'2 fillers + 13 tentativas');
+  assert.equal(elements.fullStreakOdds.textContent,'2 fillers + 8 tentativas');
 });
 
 test('uma loss de filler ocupa a loss 1 e a progressão começa na loss 2',()=>{
@@ -85,7 +86,7 @@ test('uma loss de filler ocupa a loss 1 e a progressão começa na loss 2',()=>{
   assert.match(elements.rows.innerHTML,/^<tr class="filler-row"><td data-label="Loss"><b>1<\/b><span class="filler-badge">Filler<\/span>/);
   assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>2<\/b>.*?data-label="Chegar aqui">50,00%<\/td><td data-label="Perder até aqui" class="negative">25%/);
   assert.equal(elements.continueOdds.textContent,'Inclui 1 loss com filler');
-  assert.equal(elements.fullStreakOdds.textContent,'1 filler + 14 tentativas');
+  assert.equal(elements.fullStreakOdds.textContent,'1 filler + 9 tentativas');
 });
 
 test('sem fillers começa na loss 1 e calcula toda a streak',()=>{
@@ -99,11 +100,22 @@ test('sem fillers começa na loss 1 e calcula toda a streak',()=>{
   assert.equal(buttons[3].attributes['aria-pressed'],'false');
   assert.doesNotMatch(elements.rows.innerHTML,/class="filler-row"/);
   assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>1<\/b>.*?data-label="Chegar aqui">100,00%<\/td><td data-label="Perder até aqui" class="negative">50%/);
-  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>15<\/b>/);
-  assert.equal(elements.continueLoss.textContent,'0,0031%');
-  assert.equal(elements.continueOneIn.textContent,'1 em 32768');
+  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>10<\/b>/);
+  assert.equal(elements.continueLoss.textContent,'0,0977%');
+  assert.equal(elements.continueOneIn.textContent,'1 em 1024');
   assert.equal(elements.continueOdds.textContent,'Sem losses com fillers');
-  assert.equal(elements.fullStreakOdds.textContent,'15 tentativas sem fillers');
+  assert.equal(elements.fullStreakOdds.textContent,'10 tentativas sem fillers');
+});
+
+test('repor valores restaura a loss máxima para 10',()=>{
+  const {elements}=calculator();
+  elements.maxLoss.value='18';
+  elements.maxLoss.listeners.input();
+  elements.reset.listeners.click();
+  assert.equal(Number(elements.maxLoss.value),10);
+  assert.equal(elements.finalStreak.textContent,'10 losses');
+  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>10<\/b>/);
+  assert.doesNotMatch(elements.rows.innerHTML,/data-label="Loss"><b>11<\/b>/);
 });
 
 test('o limite 12 termina a tabela e o capital na loss 12',()=>{
