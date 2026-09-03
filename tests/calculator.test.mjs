@@ -8,7 +8,7 @@ const script=html.slice(html.indexOf('<script>')+8,html.indexOf('</script>'));
 
 function calculator(){
   const values={price1:1.34,price2:2.68,chance:50,lossStreak:3,priorLoss:.81,growth:2.2,rounds:12,maxLoss:15,fee:0,rate:7.7};
-  const outputs=['rows','reset','winProfit','winProfitEuro','winRoi','currentTotalProfit','currentTotalRoi','netTarget','multiplier','continueLoss','continueOdds','finalStreak','fullStreakOdds','bankroll','bankrollEuro'];
+  const outputs=['rows','reset','winProfit','winProfitEuro','winRoi','currentTotalProfit','currentTotalRoi','netTarget','multiplier','continueLoss','continueOneIn','continueOdds','finalStreak','fullStreakOdds','bankroll','bankrollEuro'];
   const elements=Object.fromEntries([...Object.entries(values),...outputs.map(id=>[id,''])].map(([id,value])=>[id,{
     value:String(value),textContent:'',innerHTML:'',listeners:{},
     classList:{add(){},remove(){}},
@@ -37,6 +37,8 @@ test('três losses anteriores começam na loss 4 e contam a probabilidade total'
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>4<\/b>/);
   assert.match(elements.rows.innerHTML,/data-label="Chegar aqui">12,50%<\/td><td data-label="Perder até aqui" class="negative">6,25%/);
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>15<\/b>/);
+  assert.equal(elements.continueLoss.textContent,'0,0244%');
+  assert.equal(elements.continueOneIn.textContent,'1 em 4096');
 });
 
 test('duas losses anteriores começam na loss 3 e continuam até à loss 15',()=>{
@@ -59,4 +61,6 @@ test('o limite 12 termina a tabela e o capital na loss 12',()=>{
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>12<\/b>/);
   assert.doesNotMatch(elements.rows.innerHTML,/data-label="Loss"><b>13<\/b>/);
   assert.equal(elements.bankroll.textContent,'1347,82 tokens');
+  assert.equal(elements.continueLoss.textContent,'0,1953%');
+  assert.equal(elements.continueOneIn.textContent,'1 em 512');
 });
