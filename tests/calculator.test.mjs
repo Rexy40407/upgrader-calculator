@@ -30,7 +30,7 @@ function calculator(){
   return {elements,buttons};
 }
 
-test('a loss máxima padrão alterna a chance principal e a reduzida',()=>{
+test('a progressão alterna a chance principal e a reduzida',()=>{
   assert.match(html,/Início da streak/);
   assert.match(html,/Começa sem fillers ou escolhe entre 1 e 5 losses de fillers\./);
   assert.doesNotMatch(html,/>Losses anteriores</);
@@ -44,10 +44,12 @@ test('a loss máxima padrão alterna a chance principal e a reduzida',()=>{
   assert.match(html,/data-losses="4"/);
   assert.match(html,/data-losses="5"/);
   assert.match(html,/id="fillerPrice"[^>]*value="0\.27"/);
+  assert.match(html,/id="price1"[^>]*value="1\.8"/);
+  assert.match(html,/id="price2"[^>]*value="3\.6"/);
   assert.match(html,/id="retryChance"[^>]*value="30"/);
   assert.match(html,/id="growth"[^>]*value="3\.1"/);
   assert.doesNotMatch(html,/id="priorLoss"/);
-  assert.match(html,/id="maxLoss"[^>]*value="10"/);
+  assert.match(html,/id="maxLoss"[^>]*value="16"/);
   assert.doesNotMatch(html,/id="rounds"/);
   const {elements}=calculator();
   assert.equal([...elements.rows.innerHTML.matchAll(/class="filler-row"/g)].length,3);
@@ -161,16 +163,18 @@ test('alterar a chance após loss atualiza payout, badge e probabilidade',()=>{
   assert.equal(elements.continueOneIn.textContent,'1 em 303');
 });
 
-test('repor valores restaura a loss máxima para 10',()=>{
+test('repor valores restaura os novos preços e a loss máxima para 16',()=>{
   const {elements}=calculator();
   elements.maxLoss.value='18';
   elements.maxLoss.listeners.input();
   elements.reset.listeners.click();
-  assert.equal(Number(elements.maxLoss.value),10);
+  assert.equal(Number(elements.price1.value),1.8);
+  assert.equal(Number(elements.price2.value),3.6);
+  assert.equal(Number(elements.maxLoss.value),16);
   assert.equal(Number(elements.growth.value),3.1);
-  assert.equal(elements.finalStreak.textContent,'10 losses');
-  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>10<\/b>/);
-  assert.doesNotMatch(elements.rows.innerHTML,/data-label="Loss"><b>11<\/b>/);
+  assert.equal(elements.finalStreak.textContent,'16 losses');
+  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>16<\/b>/);
+  assert.doesNotMatch(elements.rows.innerHTML,/data-label="Loss"><b>17<\/b>/);
 });
 
 test('o limite 12 termina a tabela e o capital na loss 12',()=>{
