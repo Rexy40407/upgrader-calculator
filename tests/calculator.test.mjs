@@ -32,7 +32,7 @@ test('três losses de start começam na loss 4 e contam a probabilidade total',(
   assert.match(html,/Início da streak/);
   assert.match(html,/Começa sem fillers ou escolhe 2 ou 3 losses de fillers\./);
   assert.doesNotMatch(html,/>Losses anteriores</);
-  assert.match(html,/A primeira linha é a próxima tentativa; os fillers só definem o número da streak\./);
+  assert.match(html,/Os fillers aparecem primeiro e a progressão normal continua depois\./);
   assert.match(html,/Perder até à loss máxima/);
   assert.doesNotMatch(html,/a partir de agora/);
   assert.match(html,/data-losses="0"/);
@@ -41,9 +41,12 @@ test('três losses de start começam na loss 4 e contam a probabilidade total',(
   assert.match(html,/id="maxLoss"/);
   assert.doesNotMatch(html,/id="rounds"/);
   const {elements}=calculator();
-  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>4<\/b>/);
-  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>4<\/b>.*?data-label="Chegar aqui">100,00%<\/td><td data-label="Perder até aqui" class="negative">50%/);
-  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>5<\/b>.*?data-label="Chegar aqui">50,00%<\/td><td data-label="Perder até aqui" class="negative">25%/);
+  assert.equal([...elements.rows.innerHTML.matchAll(/class="filler-row"/g)].length,3);
+  assert.match(elements.rows.innerHTML,/^<tr class="filler-row"><td data-label="Loss"><b>1<\/b><span class="filler-badge">Filler<\/span>/);
+  assert.match(elements.rows.innerHTML,/class="filler-row"><td data-label="Loss"><b>3<\/b><span class="filler-badge">Filler<\/span>/);
+  assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>4<\/b>/);
+  assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>4<\/b>.*?data-label="Chegar aqui">12,50%<\/td><td data-label="Perder até aqui" class="negative">6,25%/);
+  assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>5<\/b>.*?data-label="Chegar aqui">6,25%<\/td><td data-label="Perder até aqui" class="negative">3,125%/);
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>15<\/b>/);
   assert.equal(elements.continueLoss.textContent,'0,0031%');
   assert.equal(elements.continueOneIn.textContent,'1 em 32768');
@@ -59,8 +62,9 @@ test('duas losses de start começam na loss 3 e continuam até à loss 15',()=>{
   assert.equal(buttons[0].attributes['aria-pressed'],'false');
   assert.equal(buttons[1].attributes['aria-pressed'],'true');
   assert.equal(buttons[2].attributes['aria-pressed'],'false');
-  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>3<\/b>/);
-  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>3<\/b>.*?data-label="Chegar aqui">100,00%<\/td><td data-label="Perder até aqui" class="negative">50%/);
+  assert.equal([...elements.rows.innerHTML.matchAll(/class="filler-row"/g)].length,2);
+  assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>3<\/b>/);
+  assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>3<\/b>.*?data-label="Chegar aqui">25,00%<\/td><td data-label="Perder até aqui" class="negative">12,5%/);
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>15<\/b>/);
   assert.equal(elements.continueOdds.textContent,'Inclui 2 losses com fillers');
   assert.equal(elements.fullStreakOdds.textContent,'2 fillers + 13 tentativas');
@@ -74,7 +78,8 @@ test('sem fillers começa na loss 1 e calcula toda a streak',()=>{
   assert.equal(buttons[0].attributes['aria-pressed'],'true');
   assert.equal(buttons[1].attributes['aria-pressed'],'false');
   assert.equal(buttons[2].attributes['aria-pressed'],'false');
-  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>1<\/b>.*?data-label="Chegar aqui">100,00%<\/td><td data-label="Perder até aqui" class="negative">50%/);
+  assert.doesNotMatch(elements.rows.innerHTML,/class="filler-row"/);
+  assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>1<\/b>.*?data-label="Chegar aqui">100,00%<\/td><td data-label="Perder até aqui" class="negative">50%/);
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>15<\/b>/);
   assert.equal(elements.continueLoss.textContent,'0,0031%');
   assert.equal(elements.continueOneIn.textContent,'1 em 32768');
