@@ -14,7 +14,7 @@ function calculator(){
     classList:{add(){},remove(){}},
     addEventListener(type,handler){this.listeners[type]=handler}
   }]));
-  const buttons=[2,3].map(losses=>({
+  const buttons=[0,2,3].map(losses=>({
     dataset:{losses:String(losses)},listeners:{},attributes:{},
     addEventListener(type,handler){this.listeners[type]=handler},
     setAttribute(name,value){this.attributes[name]=String(value)},
@@ -29,10 +29,11 @@ function calculator(){
 }
 
 test('três losses de start começam na loss 4 e contam a probabilidade total',()=>{
-  assert.match(html,/Losses de start com fillers/);
-  assert.match(html,/Escolhe se começas com 2 ou 3 losses de fillers\./);
+  assert.match(html,/Início da streak/);
+  assert.match(html,/Começa sem fillers ou escolhe 2 ou 3 losses de fillers\./);
   assert.doesNotMatch(html,/>Losses anteriores</);
   assert.match(html,/A primeira linha é a próxima tentativa; os fillers só definem o número da streak\./);
+  assert.match(html,/data-losses="0"/);
   assert.match(html,/data-losses="2"/);
   assert.match(html,/data-losses="3"/);
   assert.match(html,/id="maxLoss"/);
@@ -48,14 +49,29 @@ test('três losses de start começam na loss 4 e contam a probabilidade total',(
 
 test('duas losses de start começam na loss 3 e continuam até à loss 15',()=>{
   const {elements,buttons}=calculator();
-  buttons[0].click();
+  buttons[1].click();
   assert.equal(elements.lossStreak.value,'2');
   assert.equal(elements.maxLoss.value,'15');
-  assert.equal(buttons[0].attributes['aria-pressed'],'true');
-  assert.equal(buttons[1].attributes['aria-pressed'],'false');
+  assert.equal(buttons[0].attributes['aria-pressed'],'false');
+  assert.equal(buttons[1].attributes['aria-pressed'],'true');
+  assert.equal(buttons[2].attributes['aria-pressed'],'false');
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>3<\/b>/);
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>3<\/b>.*?data-label="Chegar aqui">100,00%<\/td><td data-label="Perder até aqui" class="negative">50%/);
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>15<\/b>/);
+});
+
+test('sem fillers começa na loss 1 e calcula toda a streak',()=>{
+  const {elements,buttons}=calculator();
+  buttons[0].click();
+  assert.equal(elements.lossStreak.value,'0');
+  assert.equal(elements.maxLoss.min,'1');
+  assert.equal(buttons[0].attributes['aria-pressed'],'true');
+  assert.equal(buttons[1].attributes['aria-pressed'],'false');
+  assert.equal(buttons[2].attributes['aria-pressed'],'false');
+  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>1<\/b>.*?data-label="Chegar aqui">100,00%<\/td><td data-label="Perder até aqui" class="negative">50%/);
+  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>15<\/b>/);
+  assert.equal(elements.continueLoss.textContent,'0,0031%');
+  assert.equal(elements.continueOneIn.textContent,'1 em 32768');
 });
 
 test('o limite 12 termina a tabela e o capital na loss 12',()=>{
