@@ -10,7 +10,7 @@ const script=scriptMatch[1];
 
 function calculator(){
   const values={price1:1.34,price2:2.68,chance:50,lossStreak:3,fillerPrice:.27,growth:2.2,rounds:7,maxLoss:10,fee:0,rate:7.7,capitalLimit:278.24,affordableLosses:10,planChance:50};
-  const outputs=['rows','reset','affordForm','applyPlan','plannerError','plannerResult','calculatedPrice','calculatedTarget','calculatedBreakdown','winProfit','winProfitEuro','winRoi','currentTotalProfit','currentTotalRoi','netTarget','multiplier','continueLoss','continueOneIn','continueOdds','finalStreak','fullStreakOdds','bankroll','bankrollEuro'];
+  const outputs=['rows','reset','affordForm','applyPlan','plannerError','plannerResult','calculatedPrice','calculatedTarget','calculatedBreakdown','stopLossNote','winProfit','winProfitEuro','winRoi','currentTotalProfit','currentTotalRoi','netTarget','multiplier','continueLoss','continueOneIn','continueOdds','finalStreak','fullStreakOdds','bankroll','bankrollEuro'];
   const elements=Object.fromEntries([...Object.entries(values),...outputs.map(id=>[id,''])].map(([id,value])=>[id,{
     value:String(value),textContent:'',innerHTML:'',listeners:{},hidden:false,
     classList:{add(){},remove(){}},
@@ -34,7 +34,7 @@ test('a loss máxima padrão é 10 e três fillers deixam sete tentativas',()=>{
   assert.match(html,/Início da streak/);
   assert.match(html,/Começa sem fillers ou escolhe 1, 2 ou 3 losses de fillers\./);
   assert.doesNotMatch(html,/>Losses anteriores</);
-  assert.match(html,/Os fillers aparecem primeiro e a progressão normal continua depois\./);
+  assert.match(html,/A linha laranja marca a stop loss recomendada a 50% do capital\./);
   assert.match(html,/Perder até à loss máxima/);
   assert.doesNotMatch(html,/a partir de agora/);
   assert.match(html,/data-losses="0"/);
@@ -193,4 +193,21 @@ test('o planeador valida uma streak maior do que os fillers',()=>{
   assert.equal(elements.plannerResult.hidden,true);
   assert.equal(elements.plannerError.hidden,false);
   assert.equal(elements.plannerError.textContent,'Com 3 fillers, escolhe pelo menos 4 losses.');
+});
+
+test('a progressão marca em laranja a última loss antes de metade do capital',()=>{
+  const {elements}=calculator();
+  assert.match(elements.rows.innerHTML,/<tr class="stop-loss-row"><td data-label="Loss"><b>9<\/b><span class="stop-loss-badge">Stop loss recomendada<\/span>/);
+  assert.match(elements.stopLossNote.textContent,/parar após a loss 9, com 126,31 tokens usados/);
+  assert.match(elements.stopLossNote.textContent,/metade \(139,12\)/);
+  assert.equal([...elements.rows.innerHTML.matchAll(/stop-loss-row/g)].length,1);
+});
+
+test('alterar o capital move imediatamente a stop loss recomendada',()=>{
+  const {elements}=calculator();
+  elements.capitalLimit.value='100';
+  elements.capitalLimit.listeners.input();
+  assert.match(elements.rows.innerHTML,/<tr class="stop-loss-row"><td data-label="Loss"><b>7<\/b><span class="stop-loss-badge">Stop loss recomendada<\/span>/);
+  assert.match(elements.stopLossNote.textContent,/parar após a loss 7, com 25,86 tokens usados/);
+  assert.match(elements.stopLossNote.textContent,/metade \(50,00\)/);
 });
