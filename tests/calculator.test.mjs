@@ -4,7 +4,9 @@ import test from 'node:test';
 import vm from 'node:vm';
 
 const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-const script=html.slice(html.indexOf('<script>')+8,html.indexOf('</script>'));
+const scriptMatch=html.match(/<script id="calculator-script">([\s\S]*?)<\/script>/);
+assert.ok(scriptMatch,'calculator script not found');
+const script=scriptMatch[1];
 
 function calculator(){
   const values={price1:1.34,price2:2.68,chance:50,lossStreak:3,fillerPrice:.27,growth:2.2,rounds:7,maxLoss:10,fee:0,rate:7.7};
