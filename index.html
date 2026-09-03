@@ -62,14 +62,14 @@
     </output>
 
     <section>
-      <div class="section-head"><h2>Progressão</h2><p>As probabilidades incluem as losses de start com fillers.</p></div>
+      <div class="section-head"><h2>Progressão</h2><p>A primeira linha é a próxima tentativa; os fillers só definem o número da streak.</p></div>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Loss</th><th>Preço usado</th><th>Valor recebido</th><th>Chegar aqui</th><th>Perder até aqui</th><th>Lucro da tentativa</th><th>Lucro após perdas</th><th>Lucro total %</th><th>Total investido</th></tr></thead>
           <tbody id="rows"></tbody>
         </table>
       </div>
-      <div class="footer"><span><b>Chegar aqui:</b> todas as losses antes desta linha aconteceram.</span><span><b>Perder até aqui:</b> inclui também a loss desta linha.</span></div>
+      <div class="footer"><span><b>Chegar aqui:</b> todas as tentativas calculadas antes desta linha falharam.</span><span><b>Perder até aqui:</b> inclui também a loss desta linha.</span></div>
     </section>
   </main>
 
@@ -84,7 +84,7 @@
       const v=read(),p=v.chance/100,q=1-p,feeFactor=1-v.fee/100,netTarget=v.price2*feeFactor,profit=netTarget-v.price1,roi=profit/v.price1,currentExposure=v.priorLoss+v.price1,currentProfit=netTarget-currentExposure,currentRoi=currentProfit/currentExposure;
       let previous=0;const rows=[];
       for(let i=0;i<v.rounds;i++){
-        const price1=round2(v.price1*v.growth**i),price2=round2(v.price2*v.growth**i),netPrice2=price2*feeFactor,upgradeProfit=netPrice2-price1,exposure=v.priorLoss+previous+price1,totalProfit=netPrice2-exposure,totalRoi=totalProfit/exposure,reach=q**(v.lossStreak+i),loss=q**(v.lossStreak+i+1);
+        const price1=round2(v.price1*v.growth**i),price2=round2(v.price2*v.growth**i),netPrice2=price2*feeFactor,upgradeProfit=netPrice2-price1,exposure=v.priorLoss+previous+price1,totalProfit=netPrice2-exposure,totalRoi=totalProfit/exposure,reach=q**i,loss=q**(i+1);
         rows.push({step:i+1,streak:v.lossStreak+i+1,price1,netPrice2,reach,loss,upgradeProfit,totalProfit,totalRoi,exposure});previous+=price1;
       }
       const conditional=q**v.rounds,full=q**(v.lossStreak+v.rounds),bankroll=v.priorLoss+previous;

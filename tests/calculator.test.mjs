@@ -32,13 +32,15 @@ test('três losses de start começam na loss 4 e contam a probabilidade total',(
   assert.match(html,/Losses de start com fillers/);
   assert.match(html,/Escolhe se começas com 2 ou 3 losses de fillers\./);
   assert.doesNotMatch(html,/>Losses anteriores</);
+  assert.match(html,/A primeira linha é a próxima tentativa; os fillers só definem o número da streak\./);
   assert.match(html,/data-losses="2"/);
   assert.match(html,/data-losses="3"/);
   assert.match(html,/id="maxLoss"/);
   assert.doesNotMatch(html,/id="rounds"/);
   const {elements}=calculator();
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>4<\/b>/);
-  assert.match(elements.rows.innerHTML,/data-label="Chegar aqui">12,50%<\/td><td data-label="Perder até aqui" class="negative">6,25%/);
+  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>4<\/b>.*?data-label="Chegar aqui">100,00%<\/td><td data-label="Perder até aqui" class="negative">50%/);
+  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>5<\/b>.*?data-label="Chegar aqui">50,00%<\/td><td data-label="Perder até aqui" class="negative">25%/);
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>15<\/b>/);
   assert.equal(elements.continueLoss.textContent,'0,0244%');
   assert.equal(elements.continueOneIn.textContent,'1 em 4096');
@@ -52,7 +54,7 @@ test('duas losses de start começam na loss 3 e continuam até à loss 15',()=>{
   assert.equal(buttons[0].attributes['aria-pressed'],'true');
   assert.equal(buttons[1].attributes['aria-pressed'],'false');
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>3<\/b>/);
-  assert.match(elements.rows.innerHTML,/data-label="Chegar aqui">25,00%<\/td><td data-label="Perder até aqui" class="negative">12,5%/);
+  assert.match(elements.rows.innerHTML,/data-label="Loss"><b>3<\/b>.*?data-label="Chegar aqui">100,00%<\/td><td data-label="Perder até aqui" class="negative">50%/);
   assert.match(elements.rows.innerHTML,/data-label="Loss"><b>15<\/b>/);
 });
 
