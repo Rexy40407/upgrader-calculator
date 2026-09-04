@@ -47,22 +47,22 @@
 
     <section class="workspace" aria-label="Parâmetros do upgrade">
       <div class="primary">
-        <div class="field"><label for="price1">Preço 1 <span class="unit">ITEM USADO</span></label><input id="price1" type="number" min="0.01" step="0.01" value="1.5"></div>
-        <div class="field"><label for="price2">Preço 2 <span class="unit">ITEM ALVO</span></label><input id="price2" type="number" min="0.01" step="0.01" value="3"></div>
-        <div class="field"><label for="chance">Chance <span class="unit">%</span></label><input id="chance" type="number" min="0.01" max="100" step="0.01" value="50"></div>
+        <div class="field"><label for="price1">Preço 1 <span class="unit">ITEM USADO</span></label><input id="price1" type="number" min="0.01" step="0.01" value="3.45"></div>
+        <div class="field"><label for="price2">Preço 2 <span class="unit">ITEM ALVO</span></label><input id="price2" type="number" min="0.01" step="0.01" value="4.6"></div>
+        <div class="field"><label for="chance">Chance <span class="unit">%</span></label><input id="chance" type="number" min="0.01" max="100" step="0.01" value="75"></div>
         <div class="field retry-field"><label for="retryChance">Chance após loss <span class="unit">%</span></label><input id="retryChance" type="number" min="0.01" max="100" step="0.01" value="30"></div>
       </div>
       <div class="attempt-controls">
         <span class="attempt-label">Tentativas adicionais</span>
         <div class="attempt-buttons" role="group" aria-label="Ativar ou desativar tentativas adicionais">
-          <button id="toggleRetry" class="attempt-toggle retry-toggle" type="button" aria-pressed="true">Tentativas 30%<span class="toggle-state" aria-hidden="true"></span></button>
-          <button id="toggleDeep" class="attempt-toggle deep-toggle" type="button" aria-pressed="true">Tentativas 10%<span class="toggle-state" aria-hidden="true"></span></button>
+          <button id="toggleRetry" class="attempt-toggle retry-toggle" type="button" aria-pressed="false">Tentativas 30%<span class="toggle-state" aria-hidden="true"></span></button>
+          <button id="toggleDeep" class="attempt-toggle deep-toggle" type="button" aria-pressed="false">Tentativas 10%<span class="toggle-state" aria-hidden="true"></span></button>
         </div>
       </div>
       <details class="advanced">
         <summary>Opções da progressão</summary>
         <div class="advanced-grid">
-          <div class="field"><label for="growth">Aumento ×</label><input id="growth" type="number" min="1" step="0.05" value="4"></div>
+          <div class="field"><label for="growth">Aumento ×</label><input id="growth" type="number" min="1" step="0.05" value="4.5"></div>
           <div class="field"><label for="fee">Taxa %</label><input id="fee" type="number" min="0" max="99" step="0.1" value="0"></div>
           <div class="field"><label for="rate">Tokens / €</label><input id="rate" type="number" min="0.01" step="0.01" value="7.7"></div>
         </div>
@@ -77,7 +77,7 @@
       <div class="result"><span class="label">Perder até à loss máxima</span><strong class="value danger probability-value"><span id="continueLoss">0,0977%</span><span id="continueOneIn" class="one-in">1 em 1024</span></strong><span id="continueOdds" class="note">Inclui 3 losses com fillers</span></div>
       <div class="result"><span class="label">Streak final</span><strong id="finalStreak" class="value">10 losses</strong><span id="fullStreakOdds" class="note">3 fillers + 7 tentativas</span></div>
       <div class="result limit-result">
-        <div class="limit-panel"><label class="label" for="maxLoss">Loss máxima</label><input id="maxLoss" class="max-loss-input" type="number" min="4" max="30" step="1" value="17"><span class="note">Última loss da tabela</span></div>
+        <div class="limit-panel"><label class="label" for="maxLoss">Loss máxima</label><input id="maxLoss" class="max-loss-input" type="number" min="4" max="30" step="1" value="8"><span class="note">Última loss da tabela</span></div>
         <div class="capital-panel"><span class="label">Capital máximo</span><strong id="bankroll" class="value">278,24 tokens</strong><span id="bankrollEuro" class="note">≈ 36,14 €</span></div>
       </div>
     </output>
@@ -93,10 +93,10 @@
           <span class="planner-input"><input id="capitalLimit" type="number" min="0.01" step="0.01" value="0" inputmode="decimal"><span>tokens</span></span>
         </label>
         <label class="planner-field" for="affordableLosses">Losses a suportar
-          <span class="planner-input"><input id="affordableLosses" type="number" min="1" max="30" step="1" value="10" inputmode="numeric"><span>losses</span></span>
+          <span class="planner-input"><input id="affordableLosses" type="number" min="1" max="30" step="1" value="8" inputmode="numeric"><span>losses</span></span>
         </label>
         <label class="planner-field" for="planChance">Chance escolhida
-          <span class="planner-input"><input id="planChance" type="number" min="0.01" max="100" step="0.01" value="50" inputmode="decimal"><span>%</span></span>
+          <span class="planner-input"><input id="planChance" type="number" min="0.01" max="100" step="0.01" value="75" inputmode="decimal"><span>%</span></span>
         </label>
         <button class="calculate-plan" type="submit">Calcular</button>
         <p id="plannerError" class="planner-error" role="alert" hidden></p>
@@ -124,7 +124,7 @@
   </main>
 
   <script id="calculator-script">
-    const defaults={price1:1.5,price2:3,chance:50,retryChance:30,lossStreak:3,fillerPrice:.27,growth:4,maxLoss:17,fee:0,rate:7.7,capitalLimit:0};
+    const defaults={price1:3.45,price2:4.6,chance:75,retryChance:30,lossStreak:3,fillerPrice:.27,growth:4.5,maxLoss:8,fee:0,rate:7.7,capitalLimit:0,affordableLosses:8,planChance:75},defaultAttempts={toggleRetry:false,toggleDeep:false};
     const ids=Object.keys(defaults),$=id=>document.getElementById(id),streakButtons=[...document.querySelectorAll('[data-losses]')],toggleButtons=[$('toggleRetry'),$('toggleDeep')],fmt=new Intl.NumberFormat('pt-PT',{maximumFractionDigits:4}),cash=new Intl.NumberFormat('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2}),oddsFmt=new Intl.NumberFormat('pt-PT',{maximumFractionDigits:0,useGrouping:false});
     const clamp=(n,a,b)=>Math.min(b,Math.max(a,n)),round2=n=>Math.round((n+Number.EPSILON)*100)/100,deepChance=.1,deepPriceLimit=100;
     const signed=n=>{n=Math.abs(n)<.005?0:n;return `${n>0?'+':n<0?'−':''}${cash.format(Math.abs(n))}`};
@@ -165,7 +165,7 @@
       const stopBadge='<span class="stop-loss-badge">Stop loss recomendada</span>',fillerRows=Array.from({length:v.lossStreak},(_,i)=>{const streak=i+1,reach=q**i,loss=q**streak,invested=v.fillerPrice*streak,isStop=streak===stopPoint?.streak;return `<tr class="filler-row${isStop?' stop-loss-row':''}"><td data-label="Loss"><b>${streak}</b><span class="filler-badge">Filler</span>${isStop?stopBadge:''}</td><td data-label="Preço usado">${cash.format(v.fillerPrice)}</td><td data-label="Valor recebido">${cash.format(0)}</td><td data-label="Chegar aqui">${cash.format(reach*100)}%</td><td data-label="Perder até aqui" class="negative">${fmt.format(loss*100)}%</td><td data-label="Lucro da tentativa" class="negative">${signed(-v.fillerPrice)}</td><td data-label="Lucro após perdas" class="negative">${signed(-invested)}</td><td data-label="Lucro total %" class="negative">${signed(invested?-100:0)}%</td><td data-label="Total investido">${cash.format(invested)}</td><td data-label="Lucro em €" class="negative">${signed(-invested/v.rate)} €</td></tr>`}).join('');
       $('rows').innerHTML=fillerRows+rows.map(r=>{const isStop=r.streak===stopPoint?.streak,rowClasses=[r.isRetry?'retry-row':'',r.isDeep?'deep-row':'',isStop?'stop-loss-row':''].filter(Boolean).join(' '),attemptBadge=r.isDeep?'<span class="deep-badge">Chance extra 10%</span>':r.isRetry?`<span class="retry-badge">Chance reduzida ${fmt.format(v.retryChance)}%</span>`:'';return `<tr${rowClasses?` class="${rowClasses}"`:''}><td data-label="Loss"><b>${r.streak}</b>${attemptBadge}${isStop?stopBadge:''}</td><td data-label="Preço usado">${cash.format(r.price1)}</td><td data-label="Valor recebido">${cash.format(r.netPrice2)}</td><td data-label="Chegar aqui">${cash.format(r.reach*100)}%</td><td data-label="Perder até aqui" class="negative">${fmt.format(r.loss*100)}%</td><td data-label="Lucro da tentativa" class="${r.upgradeProfit>=0?'positive':'negative'}">${signed(r.upgradeProfit)}</td><td data-label="Lucro após perdas" class="${r.totalProfit>=0?'positive':'negative'}">${signed(r.totalProfit)}</td><td data-label="Lucro total %" class="${r.totalRoi>=0?'positive':'negative'}">${signed(r.totalRoi*100)}%</td><td data-label="Total investido">${cash.format(r.exposure)}</td><td data-label="Lucro em €" class="${r.totalProfit>=0?'positive':'negative'}">${signed(r.totalProfit/v.rate)} €</td></tr>`}).join('');
     }
-    ids.forEach(id=>$(id).addEventListener('input',update));streakButtons.forEach(button=>button.addEventListener('click',()=>{$('lossStreak').value=button.dataset.losses;if(+$('maxLoss').value<=+button.dataset.losses)$('maxLoss').value=String(+button.dataset.losses+1);update()}));toggleButtons.forEach(button=>button.addEventListener('click',()=>{button.setAttribute('aria-pressed',String(!isPressed(button)));update()}));$('reset').addEventListener('click',()=>{Object.entries(defaults).forEach(([id,value])=>$(id).value=value);toggleButtons.forEach(button=>button.setAttribute('aria-pressed','true'));update()});
+    ids.forEach(id=>$(id).addEventListener('input',update));streakButtons.forEach(button=>button.addEventListener('click',()=>{$('lossStreak').value=button.dataset.losses;if(+$('maxLoss').value<=+button.dataset.losses)$('maxLoss').value=String(+button.dataset.losses+1);update()}));toggleButtons.forEach(button=>button.addEventListener('click',()=>{button.setAttribute('aria-pressed',String(!isPressed(button)));update()}));$('reset').addEventListener('click',()=>{Object.entries(defaults).forEach(([id,value])=>$(id).value=value);toggleButtons.forEach(button=>button.setAttribute('aria-pressed',String(defaultAttempts[button.id])));update()});
     $('affordForm').addEventListener('submit',event=>{event.preventDefault();const current=read();try{plannedValues=calculateAffordablePlan({capital:+$('capitalLimit').value,totalLosses:Math.round(+$('affordableLosses').value),chance:+$('planChance').value,retryChance:current.retryChance,retryEnabled:current.retryEnabled,deepEnabled:current.deepEnabled,fillerLosses:current.lossStreak,fillerPrice:current.fillerPrice,growth:current.growth});$('plannerError').hidden=true;$('plannerResult').hidden=false;$('calculatedPrice').textContent=`${cash.format(plannedValues.price1)} tokens`;$('calculatedTarget').textContent=`Item alvo a ${fmt.format(plannedValues.chance)}%: ${cash.format(plannedValues.price2)} tokens`;const fillers=plannedValues.fillerLosses?`${plannedValues.fillerLosses} ${plannedValues.fillerLosses===1?'filler':'fillers'} + `:'';$('calculatedBreakdown').textContent=`Capital usado: ${cash.format(plannedValues.capitalUsed)} de ${cash.format(plannedValues.capital)} tokens · ${fillers}${plannedValues.primaryAttempts} ${plannedValues.primaryAttempts===1?'principal':'principais'} + ${plannedValues.retryAttempts} ${plannedValues.retryAttempts===1?'reduzida':'reduzidas'} + ${plannedValues.deepAttempts} de 10% · perder a streak: ${fmt.format(plannedValues.lossProbability*100)}%`;}catch(error){plannedValues=null;$('plannerResult').hidden=true;$('plannerError').textContent=error.message;$('plannerError').hidden=false}});
     $('applyPlan').addEventListener('click',()=>{if(!plannedValues)return;$('price1').value=plannedValues.price1.toFixed(2);$('price2').value=plannedValues.price2.toFixed(2);$('chance').value=String(plannedValues.chance);$('maxLoss').value=String(plannedValues.totalLosses);update()});update();
   </script>
