@@ -9,7 +9,7 @@ assert.ok(scriptMatch,'calculator script not found');
 const script=scriptMatch[1];
 
 function calculator(){
-  const values={price1:1.34,price2:2.68,chance:50,retryChance:30,lossStreak:3,fillerPrice:.27,growth:3.1,rounds:7,maxLoss:10,fee:0,rate:7.7,capitalLimit:278.24,affordableLosses:10,planChance:50};
+  const values={price1:1.34,price2:2.68,chance:50,retryChance:30,lossStreak:3,fillerPrice:.27,growth:3.1,retryGrowth:1,rounds:7,maxLoss:10,rate:7.7,capitalLimit:278.24,affordableLosses:10,planChance:50};
   const outputs=['rows','reset','toggleRetry','toggleDeep','affordForm','applyPlan','plannerError','plannerResult','calculatedPrice','calculatedTarget','calculatedBreakdown','stopLossNote','winProfit','winProfitEuro','winRoi','currentTotalProfit','currentTotalRoi','netTarget','multiplier','continueLoss','continueOneIn','continueOdds','finalStreak','fullStreakOdds','bankroll','bankrollEuro'];
   const elements=Object.fromEntries([...Object.entries(values),...outputs.map(id=>[id,''])].map(([id,value])=>[id,{
     id,value:String(value),textContent:'',innerHTML:'',listeners:{},attributes:{},hidden:false,disabled:false,
@@ -54,6 +54,8 @@ test('a progressão alterna a chance principal e a reduzida',()=>{
   assert.match(html,/id="chance"[^>]*value="75"/);
   assert.match(html,/id="retryChance"[^>]*value="30"/);
   assert.match(html,/id="growth"[^>]*value="4\.5"/);
+  assert.match(html,/id="retryGrowth"[^>]*value="1"/);
+  assert.doesNotMatch(html,/id="fee"/);
   assert.doesNotMatch(html,/id="priorLoss"/);
   assert.match(html,/id="maxLoss"[^>]*value="8"/);
   assert.match(html,/id="capitalLimit"[^>]*value="0"/);
@@ -186,6 +188,16 @@ test('alterar a chance após loss atualiza payout, badge e probabilidade',()=>{
   assert.equal(elements.continueOneIn.textContent,'1 em 140');
 });
 
+test('o aumento após loss altera apenas a tentativa de chance reduzida',()=>{
+  const {elements}=calculator();
+  elements.retryGrowth.value='2';
+  elements.retryGrowth.listeners.input();
+
+  assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>4<\/b>.*?data-label="Preço usado">1,34<\/td>/);
+  assert.match(elements.rows.innerHTML,/<tr class="retry-row"><td data-label="Loss"><b>5<\/b>.*?data-label="Preço usado">2,68<\/td><td data-label="Valor recebido">8,93<\/td>/);
+  assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>7<\/b>.*?data-label="Preço usado">4,15<\/td>/);
+});
+
 test('o botão de 30% remove e repõe as tentativas reduzidas',()=>{
   assert.match(html,/id="toggleRetry"[^>]*aria-pressed="false"[^>]*>[^<]*Tentativas 30%/);
   const {elements}=calculator();
@@ -273,6 +285,7 @@ test('repor valores restaura o preset de 8 losses',()=>{
   assert.equal(Number(elements.chance.value),75);
   assert.equal(Number(elements.maxLoss.value),8);
   assert.equal(Number(elements.growth.value),4.5);
+  assert.equal(Number(elements.retryGrowth.value),1);
   assert.equal(Number(elements.capitalLimit.value),0);
   assert.equal(Number(elements.affordableLosses.value),8);
   assert.equal(Number(elements.planChance.value),75);
