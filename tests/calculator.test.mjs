@@ -163,6 +163,17 @@ test('o preço de cada filler entra no lucro, capital e tabela',()=>{
   assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>4<\/b>.*?data-label="Lucro após perdas" class="negative">−0,16<\/td>.*?data-label="Total investido">2,84<\/td>/);
 });
 
+test('mostra o lucro acumulado em euros à direita da progressão',()=>{
+  const {elements}=calculator();
+  assert.match(html,/<th>Lucro em €<\/th>/);
+  assert.match(elements.rows.innerHTML,/data-label="Lucro em €" class="negative">−0,04 €<\/td>/);
+  assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>4<\/b>.*?data-label="Lucro em €" class="positive">\+0,07 €<\/td>/);
+
+  elements.rate.value='1';
+  elements.rate.listeners.input();
+  assert.match(elements.rows.innerHTML,/<tr><td data-label="Loss"><b>4<\/b>.*?data-label="Lucro em €" class="positive">\+0,53 €<\/td>/);
+});
+
 test('alterar a chance após loss atualiza payout, badge e probabilidade',()=>{
   const {elements}=calculator();
   elements.retryChance.value='25';
