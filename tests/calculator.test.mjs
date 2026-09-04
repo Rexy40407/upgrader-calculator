@@ -10,12 +10,17 @@ const script=scriptMatch[1];
 
 function calculator(){
   const values={price1:1.34,price2:2.68,chance:50,retryChance:30,lossStreak:3,fillerPrice:.27,growth:3.1,rounds:7,maxLoss:10,fee:0,rate:7.7,capitalLimit:278.24,affordableLosses:10,planChance:50};
-  const outputs=['rows','reset','affordForm','applyPlan','plannerError','plannerResult','calculatedPrice','calculatedTarget','calculatedBreakdown','stopLossNote','winProfit','winProfitEuro','winRoi','currentTotalProfit','currentTotalRoi','netTarget','multiplier','continueLoss','continueOneIn','continueOdds','finalStreak','fullStreakOdds','bankroll','bankrollEuro'];
+  const outputs=['rows','reset','toggleRetry','toggleDeep','affordForm','applyPlan','plannerError','plannerResult','calculatedPrice','calculatedTarget','calculatedBreakdown','stopLossNote','winProfit','winProfitEuro','winRoi','currentTotalProfit','currentTotalRoi','netTarget','multiplier','continueLoss','continueOneIn','continueOdds','finalStreak','fullStreakOdds','bankroll','bankrollEuro'];
   const elements=Object.fromEntries([...Object.entries(values),...outputs.map(id=>[id,''])].map(([id,value])=>[id,{
-    value:String(value),textContent:'',innerHTML:'',listeners:{},hidden:false,
+    value:String(value),textContent:'',innerHTML:'',listeners:{},attributes:{},hidden:false,disabled:false,
     classList:{add(){},remove(){}},
-    addEventListener(type,handler){this.listeners[type]=handler}
+    addEventListener(type,handler){this.listeners[type]=handler},
+    setAttribute(name,value){this.attributes[name]=String(value)},
+    getAttribute(name){return this.attributes[name]??null},
+    click(){this.listeners.click?.()}
   }]));
+  elements.toggleRetry.attributes['aria-pressed']='true';
+  elements.toggleDeep.attributes['aria-pressed']='true';
   const buttons=[0,1,2,3,4,5].map(losses=>({
     dataset:{losses:String(losses)},listeners:{},attributes:{},
     addEventListener(type,handler){this.listeners[type]=handler},
@@ -165,6 +170,53 @@ test('alterar a chance após loss atualiza payout, badge e probabilidade',()=>{
   assert.match(elements.rows.innerHTML,/<tr class="retry-row"><td data-label="Loss"><b>5<\/b><span class="retry-badge">Chance reduzida 25%<\/span>.*?data-label="Preço usado">1,34<\/td><td data-label="Valor recebido">5,36<\/td>/);
   assert.equal(elements.continueLoss.textContent,'0,7119%');
   assert.equal(elements.continueOneIn.textContent,'1 em 140');
+});
+
+test('o botão de 30% remove e repõe as tentativas reduzidas',()=>{
+  assert.match(html,/id="toggleRetry"[^>]*aria-pressed="true"[^>]*>[^<]*Tentativas 30%/);
+  const {elements}=calculator();
+
+  elements.toggleRetry.click();
+  assert.equal(elements.toggleRetry.attributes['aria-pressed'],'false');
+  assert.equal(elements.retryChance.disabled,true);
+  assert.doesNotMatch(elements.rows.innerHTML,/retry-row|Chance reduzida/);
+  assert.match(elements.rows.innerHTML,/deep-row|Chance extra 10%/);
+  assert.equal(elements.fullStreakOdds.textContent,'3 fillers + 4 principais + 0 reduzidas + 3 de 10%');
+
+  elements.toggleRetry.click();
+  assert.equal(elements.toggleRetry.attributes['aria-pressed'],'true');
+  assert.equal(elements.retryChance.disabled,false);
+  assert.match(elements.rows.innerHTML,/retry-row|Chance reduzida 30%/);
+});
+
+test('o botão de 10% remove e repõe as tentativas extra',()=>{
+  assert.match(html,/id="toggleDeep"[^>]*aria-pressed="true"[^>]*>[^<]*Tentativas 10%/);
+  const {elements}=calculator();
+
+  elements.toggleDeep.click();
+  assert.equal(elements.toggleDeep.attributes['aria-pressed'],'false');
+  assert.doesNotMatch(elements.rows.innerHTML,/deep-row|Chance extra 10%/);
+  assert.match(elements.rows.innerHTML,/retry-row|Chance reduzida 30%/);
+  assert.equal(elements.fullStreakOdds.textContent,'3 fillers + 4 principais + 3 reduzidas + 0 de 10%');
+
+  elements.toggleDeep.click();
+  assert.equal(elements.toggleDeep.attributes['aria-pressed'],'true');
+  assert.match(elements.rows.innerHTML,/deep-row|Chance extra 10%/);
+});
+
+test('o planeador e o reset respeitam os controlos de 30% e 10%',()=>{
+  const {elements}=calculator();
+  elements.toggleRetry.click();
+  elements.toggleDeep.click();
+  elements.affordForm.listeners.submit({preventDefault(){}});
+  assert.match(elements.calculatedBreakdown.textContent,/3 fillers \+ 7 principais \+ 0 reduzidas \+ 0 de 10%/);
+
+  elements.reset.listeners.click();
+  assert.equal(elements.toggleRetry.attributes['aria-pressed'],'true');
+  assert.equal(elements.toggleDeep.attributes['aria-pressed'],'true');
+  assert.equal(elements.retryChance.disabled,false);
+  assert.match(elements.rows.innerHTML,/retry-row/);
+  assert.match(elements.rows.innerHTML,/deep-row/);
 });
 
 test('adiciona uma terceira tentativa de 10% quando o preço usado é inferior a 100',()=>{
